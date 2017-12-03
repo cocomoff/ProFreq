@@ -42,6 +42,19 @@ class DBOp(object):
             all_prob += prob
         return all_prob
 
+    @staticmethod
+    def frequentness(X, db, i, prob_dist=None):
+        if prob_dist is None:
+            prob_dist = []
+            for j in range(len(db)+1):
+                spX1i = DBOp.support_probability(X1, db, j)
+                prob_dist.append(spX1i)
+        answer = 0.0
+        for j in range(i, len(db)+1):
+            answer += prob_dist[j]
+        return answer
+
+    
 def sample_expected_support():
     db = Database.toy()
     db.dump()
@@ -53,8 +66,8 @@ def sample_expected_support():
     esX2 = DBOp.expected_support(X1, db)
     print(X2, esX2)
 
-
-if __name__ == '__main__':
+    
+def sample_support_probability():
     db = Database.toy()
     db.dump()
     X1 = set({"D"})
@@ -64,3 +77,22 @@ if __name__ == '__main__':
         prob_dist.append(spX1i)
     plt.plot(range(len(db)+1), prob_dist, "ro")
     plt.show()
+
+
+if __name__ == '__main__':
+    db = Database.toy()
+    db.dump()
+    X1 = set({"D"})
+    prob_dist = []
+    for i in range(len(db)+1):
+        spX1i = DBOp.support_probability(X1, db, i)
+        prob_dist.append(spX1i)
+
+    # frequentness
+    freq_dist = []
+    for i in range(len(db)+1):
+        fX1i = DBOp.frequentness(X1, db, i, prob_dist)
+        freq_dist.append(fX1i)
+    plt.plot(range(len(db)+1), freq_dist, "ro--")
+    plt.show()
+    
