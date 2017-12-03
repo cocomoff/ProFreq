@@ -1,23 +1,48 @@
 from item import UItem, Trans
 from database import Database
+from itertools import combinations
+
+import matplotlib.pyplot as plt
 
 class DBOp(object):
     def __init__(self):
         pass
 
     @staticmethod
+    def prob_trans(X, t):
+        prob = 1.0
+        for itemX in X:
+            if itemX in t.prob:
+                prob *= t.prob[itemX]
+            else:
+                prob *= 0.0
+                break
+        return prob
+
+    @staticmethod
     def expected_support(X, db):
         count = 0
         for t in db:
             if X <= t.itemset:
-                prob = 1.0
-                for itemX in X:
-                    prob *= t.prob[itemX]
-                count += prob
+                count += DBOp.prob_trans(X, t)
         return count
 
+    @staticmethod
+    def support_probability(X, db, i):
+        lT = len(db)
+        all_prob = 0.0
+        for comb in combinations(range(lT), i):
+            prob = 1.0
+            S = set(comb)
+            nonS = set(range(lT)) - S
+            for t in S:
+                prob *= DBOp.prob_trans(X, db[t])
+            for t in nonS:
+                prob *= (1 - DBOp.prob_trans(X, db[t]))
+            all_prob += prob
+        return all_prob
 
-if __name__ == '__main__':
+def sample_expected_support():
     db = Database.toy()
     db.dump()
     X1 = set({"D"})
@@ -28,3 +53,14 @@ if __name__ == '__main__':
     esX2 = DBOp.expected_support(X1, db)
     print(X2, esX2)
 
+
+if __name__ == '__main__':
+    db = Database.toy()
+    db.dump()
+    X1 = set({"D"})
+    prob_dist = []
+    for i in range(len(db)+1):
+        spX1i = DBOp.support_probability(X1, db, i)
+        prob_dist.append(spX1i)
+    plt.plot(range(len(db)+1), prob_dist, "ro")
+    plt.show()

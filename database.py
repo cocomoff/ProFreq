@@ -12,6 +12,9 @@ class Database(object):
     def __iter__(self):
         return iter(self.transactions)
 
+    def __getitem__(self, index):
+        return self.transactions[index]
+
     def dump(self):
         print("--------------")
         for trans in self.transactions:
