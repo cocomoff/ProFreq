@@ -2,6 +2,7 @@ from item import UItem, Trans
 from database import Database
 from itertools import combinations
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 class DBOp(object):
@@ -71,6 +72,28 @@ class DBOp(object):
                 all_prob -= prob
         return all_prob
 
+    @staticmethod
+    def P(X, db, minsup):
+        lT = len(db)
+        mat = np.zeros((minsup+1, lT+1))
+        mat[0, :] = 1
+        for i in range(minsup+1):
+            for j in range(lT+1):
+                if i > j + 1:
+                    mat[i, j] = np.nan
+
+        # DP
+        # P_{>=i,j} = P_{>=i-1,j-1} P(X in tj) + P_{>=i,j-1} (1 - P(X in tj))
+        for i in range(1, minsup+1):
+            for j in range(lT):
+                Pxtj = DBOp.prob_trans(X, db[j])
+                mat[i, j] = mat[i-1, j-1] * Pxtj + mat[i, j-1] * (1 - Pxtj)
+                # print("DP @ i={},   j={}: {}".format(i, j, mat[i, j]))
+                # print("   i-1={}, j-1={}: {}".format(i-1, j-1, mat[i-1, j-1]))
+                # print("     i={}, j-1={}: {}".format(i, j-1, mat[i, j-1]))
+                # print("   # {}".format(Pxtj))
+        return mat[:, lT - 1]
+
     
 def sample_expected_support():
     db = Database.toy()
@@ -96,7 +119,7 @@ def sample_support_probability():
     plt.show()
 
 
-if __name__ == '__main__':
+def frequentness():
     db = Database.toy()
     db.dump()
     X1 = set({"D"})
@@ -118,3 +141,16 @@ if __name__ == '__main__':
     # plt.plot(range(len(db)+1), freq_dist, "ro--")
     # plt.show()
     
+if __name__ == '__main__':
+    db = Database.toy()
+    db.dump()
+    X1 = set({"D"})
+
+    freq_distL10 = []
+    for i in range(len(db)+1):
+        fX1iL10 = DBOp.frequentnessL10(X1, db, i)
+        freq_distL10.append(fX1iL10)
+    print(freq_distL10)
+
+    vec = DBOp.P(X1, db, minsup=6)
+    print(vec)
