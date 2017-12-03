@@ -54,6 +54,23 @@ class DBOp(object):
             answer += prob_dist[j]
         return answer
 
+    @staticmethod
+    def frequentnessL10(X, db, i):
+        lT = len(db)
+        body = set(range(lT))
+        all_prob = 1.0
+        for ssize in range(i):
+            for comb in combinations(range(lT), ssize):
+                prob = 1.0
+                S = set(comb)
+                nonS = body - S
+                for t in S:
+                    prob *= DBOp.prob_trans(X, db[t])
+                for t in nonS:
+                    prob *= (1 - DBOp.prob_trans(X, db[t]))
+                all_prob -= prob
+        return all_prob
+
     
 def sample_expected_support():
     db = Database.toy()
@@ -90,9 +107,14 @@ if __name__ == '__main__':
 
     # frequentness
     freq_dist = []
+    freq_distL10 = []
     for i in range(len(db)+1):
         fX1i = DBOp.frequentness(X1, db, i, prob_dist)
+        fX1iL10 = DBOp.frequentnessL10(X1, db, i)
         freq_dist.append(fX1i)
-    plt.plot(range(len(db)+1), freq_dist, "ro--")
-    plt.show()
+        freq_distL10.append(fX1iL10)
+    print(freq_dist)
+    print(freq_distL10)
+    # plt.plot(range(len(db)+1), freq_dist, "ro--")
+    # plt.show()
     
