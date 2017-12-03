@@ -18,6 +18,11 @@ class UItem(object):
 class Trans(object):
     def __init__(self, loui):
         self.loui = loui
+        self.itemset = set()
+        self.prob = {}
+        for uitem in self.loui:
+            self.itemset.add(uitem.key)
+            self.prob[uitem.key] = uitem.prob
 
     def __str__(self):
         ans = "["

@@ -15,6 +15,7 @@ class Database(object):
     def dump(self):
         print("--------------")
         for trans in self.transactions:
+            # print(trans.itemset)
             print(trans)
         print("--------------\n")
 
